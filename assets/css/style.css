@@ -3,3 +3,11 @@
     margin-left: 0;
     max-width: 25vw;
 }
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}
