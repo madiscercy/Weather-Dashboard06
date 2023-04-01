@@ -1,15 +1,13 @@
 
 const apiKey = 'c95faba63532c2d2027b22a1c108d7d3';
-let currentDayData = {};
 let forecastData = [];
-const weatherIndex = [0, 1, 9, 17, 25, 33];
+const weatherIndex = [0, 4, 12, 20, 28, 36];
 let buttonInfo = document.querySelector('.btn-info');
 let longitude = 0;
 let latitude = 0;
 
 
 buttonInfo.addEventListener('click', function (event) {
-
     event.preventDefault();
     const cityName = document.getElementById('q').value;
     getWeather(cityName);
@@ -18,21 +16,22 @@ buttonInfo.addEventListener('click', function (event) {
 async function getWeather(cityName) {
     longitude = 0;
     latitude = 0;
+    forecastData = [];
 
     const urlCoords = 'http://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + apiKey;
-    console.log('fetching');
     await fetch(urlCoords)
         .then((response) => response.json())
         .then((data) => extractCoordinates(data));
-    console.log('done fecthing');
 
     const urlWeather = 'http://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=' + latitude + '&lon=' + longitude + '&appid=' + apiKey;
 
     await fetch(urlWeather)
         .then((response) => response.json())
         .then((data) => extractWeatherData(data));
-
+    
+    displayWeatherData();
 }
+
 
 function extractCoordinates(cityCoords) {
     if (cityCoords && cityCoords.length > 0) {
@@ -57,17 +56,37 @@ function extractWeatherData(weatherData) {
             wind: weatherDataList[weatherListInd].wind.speed,
             humidity: weatherDataList[weatherListInd].main.humidity,
             iconUrl: iconBaseUrl + weatherDataList[weatherListInd].weather[0].icon + '.png',
+            iconAltText: weatherDataList[weatherListInd].weather[0].description,
             date: formatDate(weatherDataList[weatherListInd].dt_txt)
         }
-        console.log(weatherObj);
         
         forecastData.push(weatherObj)
     }
     console.log(forecastData)
 }
 
-// 2023-03-31 21:00:00
-// 03/31/2023
+function displayWeatherData() {
+    displayCurrentDayData();
+
+}
+
+function displayCurrentDayData() {
+    const cityNameEl = document.querySelector('.city-name');
+    const weatherImgEl = document.querySelector('.weather-img');
+    const currentWindEl = document.querySelector('.current-wind');
+    const currentTempEl = document.querySelector('.current-temp');
+    const currentHumidityEl = document.querySelector('.current-humidity');
+    
+    const currentDayData = forecastData[0];
+    console.log(currentDayData);
+    cityNameEl.textContent = currentDayData.cityName + ' ' + currentDayData.date;
+    weatherImgEl.src = currentDayData.iconUrl;
+    weatherImgEl.alt = currentDayData.iconAltText;
+    currentWindEl.textContent = 'Wind: ' + currentDayData.wind + ' MPH';
+    currentTempEl.textContent = 'Temp: ' + currentDayData.temp + '°F';
+    currentHumidityEl.textContent = 'Humidity: ' + currentDayData.humidity + '%';
+}
+
 function formatDate(unformattedDate) {
     const month = unformattedDate.slice(5,7);
     const day = unformattedDate.slice(8,10);
