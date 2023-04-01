@@ -1,7 +1,6 @@
 
 const apiKey = 'c95faba63532c2d2027b22a1c108d7d3';
 let forecastData = [];
-const weatherIndex = [0, 4, 12, 20, 28, 36];
 let buttonInfo = document.querySelector('.btn-info');
 let longitude = 0;
 let latitude = 0;
@@ -48,26 +47,34 @@ function extractWeatherData(weatherData) {
     const weatherDataList = weatherData.list;
     const iconBaseUrl = 'https://openweathermap.org/img/wn/';
     console.log(weatherData);
-    for (let i = 0; i < weatherIndex.length; i++) {
-        const weatherListInd = weatherIndex[i];
-        const  weatherObj = {
-            cityName: weatherData.city.name,
-            temp: weatherDataList[weatherListInd].main.temp,
-            wind: weatherDataList[weatherListInd].wind.speed,
-            humidity: weatherDataList[weatherListInd].main.humidity,
-            iconUrl: iconBaseUrl + weatherDataList[weatherListInd].weather[0].icon + '.png',
-            iconAltText: weatherDataList[weatherListInd].weather[0].description,
-            date: formatDate(weatherDataList[weatherListInd].dt_txt)
+    let previousDate = '';
+    for (let i = 0; i < weatherDataList.length; i++) {
+        const currentDate = formatDate(weatherDataList[i].dt_txt);
+        if (previousDate !==  currentDate) {
+            let index = i;
+            if (index !== 0) {
+                index = index + 4;
+            }
+            const  weatherObj = {
+                cityName: weatherData.city.name,
+                temp: weatherDataList[index].main.temp,
+                wind: weatherDataList[index].wind.speed,
+                humidity: weatherDataList[index].main.humidity,
+                iconUrl: iconBaseUrl + weatherDataList[index].weather[0].icon + '.png',
+                iconAltText: weatherDataList[index].weather[0].description,
+                date: currentDate
+            }
+            forecastData.push(weatherObj);
+            previousDate = currentDate;
         }
-        
-        forecastData.push(weatherObj)
+
     }
     console.log(forecastData)
 }
 
 function displayWeatherData() {
     displayCurrentDayData();
-
+    displayWeeklyData();
 }
 
 function displayCurrentDayData() {
@@ -85,6 +92,30 @@ function displayCurrentDayData() {
     currentWindEl.textContent = 'Wind: ' + currentDayData.wind + ' MPH';
     currentTempEl.textContent = 'Temp: ' + currentDayData.temp + '°F';
     currentHumidityEl.textContent = 'Humidity: ' + currentDayData.humidity + '%';
+}
+
+function displayWeeklyData() {
+    for (let i = 1; i < forecastData.length; i++) {
+        const dailyData = forecastData[i];
+        const forecastEl = document.querySelector('.day-' + i );
+        console.log(forecastEl.textContent);
+        const headerEl = document.createElement('h3');
+        const imageEl = document.createElement('img');
+        const tempEl = document.createElement('p');
+        const windEl = document.createElement('p');
+        const humidityEl = document.createElement('p');
+        headerEl.textContent = dailyData.date;
+        forecastEl.appendChild(headerEl);
+        imageEl.src = dailyData.iconUrl;
+        imageEl.alt = dailyData.iconAltText;
+        forecastEl.appendChild(imageEl);
+        windEl.textContent = 'Wind: ' + dailyData.wind + ' MPH';
+        forecastEl.appendChild(windEl);
+        tempEl.textContent = 'Temp: ' + dailyData.temp + '°F';
+        forecastEl.appendChild(tempEl);
+        humidityEl.textContent = 'Humidity: ' + dailyData.humidity + '%';
+        forecastEl.appendChild(humidityEl);
+    }
 }
 
 function formatDate(unformattedDate) {
