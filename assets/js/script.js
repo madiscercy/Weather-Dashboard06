@@ -18,12 +18,12 @@ async function getWeather(cityName) {
     latitude = 0;
     forecastData = [];
 
-    const urlCoords = 'http://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + apiKey;
+    const urlCoords = 'https://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + apiKey;
     await fetch(urlCoords)
         .then((response) => response.json())
         .then((data) => extractCoordinates(data));
 
-    const urlWeather = 'http://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=' + latitude + '&lon=' + longitude + '&appid=' + apiKey;
+    const urlWeather = 'https://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=' + latitude + '&lon=' + longitude + '&appid=' + apiKey;
 
     await fetch(urlWeather)
         .then((response) => response.json())
