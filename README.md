@@ -5,4 +5,4 @@ This is a project that is made for people who want to check the weather in vario
 
 https://madiscercy.github.io/Weather-Dashboard06/
 
-![madiscercy github io_Weather-Dashboard06_](https://user-images.githubusercontent.com/122477030/229808091-42e35fde-2425-4dea-a5ea-09184e528563.png)
+![madiscercy github io_Weather-Dashboard06_ (1)](https://user-images.githubusercontent.com/122477030/229809199-abead38f-28f3-4138-b36c-44062e0bc189.png)
