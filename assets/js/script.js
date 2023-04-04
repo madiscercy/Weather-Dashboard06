@@ -4,31 +4,42 @@ let forecastData = [];
 let buttonInfo = document.querySelector('.btn-info');
 let longitude = 0;
 let latitude = 0;
-
+let isSearching = false;
+const cityNamesKey = 'cityNames'
+const citySearchEl = document.querySelector('.city-searches')
+const weeklyWeatherEl = document.querySelector('.weekly-weather')
+const weatherInfoEl = document.querySelector('.weather-info');
 
 buttonInfo.addEventListener('click', function (event) {
     event.preventDefault();
     const cityName = document.getElementById('q').value;
+    saveCityName(cityName);
+    clearWeatherData();
     getWeather(cityName);
 });
 
 async function getWeather(cityName) {
-    longitude = 0;
-    latitude = 0;
-    forecastData = [];
+    if (!isSearching) {
+        isSearching = true;
+        longitude = 0;
 
-    const urlCoords = 'https://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + apiKey;
-    await fetch(urlCoords)
-        .then((response) => response.json())
-        .then((data) => extractCoordinates(data));
+        latitude = 0;
+        forecastData = [];
 
-    const urlWeather = 'https://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=' + latitude + '&lon=' + longitude + '&appid=' + apiKey;
+        const urlCoords = 'https://api.openweathermap.org/geo/1.0/direct?q=' + cityName + '&limit=1&appid=' + apiKey;
+        await fetch(urlCoords)
+            .then((response) => response.json())
+            .then((data) => extractCoordinates(data));
 
-    await fetch(urlWeather)
-        .then((response) => response.json())
-        .then((data) => extractWeatherData(data));
-    
-    displayWeatherData();
+        const urlWeather = 'https://api.openweathermap.org/data/2.5/forecast?units=imperial&lat=' + latitude + '&lon=' + longitude + '&appid=' + apiKey;
+
+        await fetch(urlWeather)
+            .then((response) => response.json())
+            .then((data) => extractWeatherData(data));
+
+        displayWeatherData();
+        isSearching = false;
+    }
 }
 
 
@@ -50,12 +61,12 @@ function extractWeatherData(weatherData) {
     let previousDate = '';
     for (let i = 0; i < weatherDataList.length; i++) {
         const currentDate = formatDate(weatherDataList[i].dt_txt);
-        if (previousDate !==  currentDate) {
+        if (previousDate !== currentDate) {
             let index = i;
-            if (index !== 0) {
+            if (index !== 0 && index + 4 <= 40) {
                 index = index + 4;
             }
-            const  weatherObj = {
+            const weatherObj = {
                 cityName: weatherData.city.name,
                 temp: weatherDataList[index].main.temp,
                 wind: weatherDataList[index].wind.speed,
@@ -73,6 +84,8 @@ function extractWeatherData(weatherData) {
 }
 
 function displayWeatherData() {
+    weatherInfoEl.classList.remove('hide');
+    weatherInfoEl.classList.add('show');
     displayCurrentDayData();
     displayWeeklyData();
 }
@@ -83,7 +96,7 @@ function displayCurrentDayData() {
     const currentWindEl = document.querySelector('.current-wind');
     const currentTempEl = document.querySelector('.current-temp');
     const currentHumidityEl = document.querySelector('.current-humidity');
-    
+
     const currentDayData = forecastData[0];
     console.log(currentDayData);
     cityNameEl.textContent = currentDayData.cityName + ' ' + currentDayData.date;
@@ -97,7 +110,8 @@ function displayCurrentDayData() {
 function displayWeeklyData() {
     for (let i = 1; i < forecastData.length; i++) {
         const dailyData = forecastData[i];
-        const forecastEl = document.querySelector('.day-' + i );
+        const forecastEl = document.createElement('div');
+        forecastEl.classList.add('col-md-2');
         console.log(forecastEl.textContent);
         const headerEl = document.createElement('h3');
         const imageEl = document.createElement('img');
@@ -115,13 +129,70 @@ function displayWeeklyData() {
         forecastEl.appendChild(tempEl);
         humidityEl.textContent = 'Humidity: ' + dailyData.humidity + '%';
         forecastEl.appendChild(humidityEl);
+        weeklyWeatherEl.appendChild(forecastEl);
     }
 }
 
+function clearWeatherData() {
+    weatherInfoEl.classList.remove('show');
+    weatherInfoEl.classList.add('hide');
+    while (weeklyWeatherEl.firstChild) {
+        weeklyWeatherEl.removeChild(weeklyWeatherEl.firstChild);
+    }
+}
+
+
+
 function formatDate(unformattedDate) {
-    const month = unformattedDate.slice(5,7);
-    const day = unformattedDate.slice(8,10);
-    const year = unformattedDate.slice(0,4);
+    const month = unformattedDate.slice(5, 7);
+    const day = unformattedDate.slice(8, 10);
+    const year = unformattedDate.slice(0, 4);
     const formattedDate = month + '/' + day + '/' + year;
     return formattedDate
 }
+
+function saveCityName(cityName) {
+
+    let localCityNames = localStorage.getItem(cityNamesKey);
+
+    if (localCityNames) {
+        let localCityNamesArray = JSON.parse(localCityNames);
+        if (localCityNamesArray.includes(cityName) == false) {
+            localCityNamesArray.push(cityName);
+            localStorage.setItem(cityNamesKey, JSON.stringify(localCityNamesArray));
+        }
+    } else {
+        let localCityNamesArray = [];
+        localCityNamesArray.push(cityName);
+        localStorage.setItem(cityNamesKey, JSON.stringify(localCityNamesArray));
+    }
+    console.log(cityName);
+    clearCityButtons();
+    displayCityNames();
+}
+
+function displayCityNames() {
+    let localCityNames = JSON.parse(localStorage.getItem(cityNamesKey));
+    if (localCityNames && localCityNames.length > 0) {
+        for (let i = 0; i < localCityNames.length; i++) {
+            const cityName = localCityNames[i];
+            let buttonEl = document.createElement('a');
+            buttonEl.textContent = cityName;
+            buttonEl.classList.add('btn', 'btn-secondary', 'w-100', 'mt-3');
+            buttonEl.addEventListener('click', function (event) {
+                clearWeatherData();
+                getWeather(cityName);
+            });
+            citySearchEl.appendChild(buttonEl);
+        }
+    }
+}
+
+function clearCityButtons() {
+    while (citySearchEl.firstChild) {
+        citySearchEl.removeChild(citySearchEl.firstChild);
+    }
+}
+
+
+displayCityNames();

@@ -24,18 +24,19 @@
     <nav class="navbar navbar-expand-lg bg-secondary text-light mb-5">
         <h1>Weather Dashboard</h1>
     </nav>
-    <div class="container my-5 search-container">
+    <div class="container-fluid search-container">
      <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-3">
             <h2>Search for a City</h2>
              <form id="search">
                  <div class="mb-3">
                     <input type="text" class="form-control" id="q" placeholder="Search City">
                  </div>
-                <button type="submit" class="btn btn-info">Search</button>
+                <button type="submit" class="w-100 mb-3 btn btn-info">Search</button>
+                <div class="city-searches"></div>
             </form>
         </div>
-        <div class="col-md-6 weather-info">
+        <div class="col-md-8 weather-info hide">
             <div class="current-weather">
                 <h2 class="city-name"></h2>
                 <img class="weather-img" src="" alt="">
@@ -43,12 +44,8 @@
                 <p class="current-wind"></p>
                 <p class="current-humidity"></p>
             </div>
-            <div class="weekly-weather">
-                <div class="day-1"></div>
-                <div class="day-2">2</div>
-                <div class="day-3">3</div>
-                <div class="day-4">4</div>
-                <div class="day-5">5</div>
+            <h2>5-Day Forecast:</h2>
+            <div class="weekly-weather row">
             </div>
         </div>
     </div>
